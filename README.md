@@ -1,138 +1,96 @@
-# Academic Semantic Memory Pipeline
+# 学术论文写作 AI 工具包
 
-An AI-powered academic writing toolkit that generates Nature-tier abstracts and cover letters from raw manuscripts. Built on a **Move-by-Move Solver-Verifier architecture** inspired by IMO math problem solvers — each sentence is generated independently, micro-verified, and chained via Theme-Rheme flow control.
+用 AI 从论文原稿自动生成 **Nature 级别的摘要和 Cover Letter**。
 
-> **Validated**: Pipeline independently reproduced a published Nature Photonics abstract **word-for-word** from manuscript text alone, without seeing the original abstract.
+> 验证结果：本工具独立生成的摘要与一篇已发表的 Nature Photonics 论文摘要 **逐词完全一致**，且生成过程中未读取原始摘要。
 
-## Requirements
+## 环境准备
 
-- [Antigravity](https://www.antigravity.dev/) (VS Code AI agent)
-- Python 3.10+ with `requests`, `beautifulsoup4`, `pyyaml`
+1. 安装 [Antigravity](https://www.antigravity.dev/)（VS Code AI 插件）
+2. 安装 Python 依赖：
 
 ```bash
 pip install requests beautifulsoup4 pyyaml
 ```
 
-## Quick Start (3 Steps)
+## 使用方法
 
-### 1. Prepare your manuscript
-
-Save your manuscript as a `.md` file in the project root. Include all sections (Introduction, Methods, Results, Discussion). The abstract can be a rough draft or even empty — the pipeline will generate one from scratch.
-
-### 2. Scrape target journal editorial DNA
+### 第一步：爬取目标期刊的编辑风格
 
 ```bash
-# Scrape recent articles from your target journal
+# 爬取目标期刊最近 6 个月的文章
 python scripts/scrape_nphoton.py --months 6 --output ./trend_data/ --journal nphoton
 
-# Fetch full abstracts for 20 selected articles
+# 获取 20 篇学习文章的完整摘要
 python scripts/fetch_learning_abstracts.py
 
-# Analyze editorial patterns (verb frequency, opening/closing types, hedging)
+# 分析编辑偏好（动词频率、开头/结尾模式、hedging 密度等）
 python scripts/analyze_abstracts.py
 ```
 
-Supported journals: `nphoton` · `nature` · `ncomms` · `nphys` · `nmat` · `nnano` · `nmeth` · `nchem` · `natelectron` · `lsa`
+支持的期刊：`nphoton`（Nature Photonics）· `nature` · `ncomms` · `nphys` · `nmat` · `nnano` · `nmeth` · `nchem` · `natelectron` · `lsa`
 
-### 3. Run the pipeline
+### 第二步：准备论文
 
-Use the `/polish_abstract` workflow in Antigravity. It will:
-1. Extract a **Semantic Core** (facts, logic graph, claims) from your manuscript
-2. Generate a **Writing Brief** from the journal's editorial DNA
-3. Run the **Move-by-Move Solver** (7 Moves, Best-of-4 candidates per Move)
-4. Verify with **5-dimension scoring** + **Source Lock** + **Adversarial Red Team**
-5. Output `abstract_candidates.md` and `abstract_scoring_matrix.md`
+将论文保存为 `.md` 文件放在项目根目录。需要包含正文（Introduction、Methods、Results、Discussion）。摘要可以是草稿、甚至空白——工具会从正文重新生成。
 
-For cover letters: use the `cover_letter_generator` skill after generating an abstract.
+### 第三步：运行
 
-## Architecture
+在 Antigravity 中使用 `/polish_abstract` 指令。工具会自动完成：
+
+1. **提取语义核心** — 从论文中提取事实、逻辑关系和声称
+2. **逐句生成摘要** — 每句话生成 4 个候选，逐一验证，选最优
+3. **全局验证** — 5 维打分 + 原创性检查 + 审稿人攻击测试
+4. **输出** — `abstract_candidates.md`（摘要）+ `abstract_scoring_matrix.md`（评分）
+
+生成 Cover Letter：摘要完成后使用 `cover_letter_generator` 技能。
+
+## 工作原理
 
 ```
-Your Manuscript
+你的论文原稿
       │
       ▼
-┌─────────────┐     ┌──────────────┐
-│  Semantic    │     │  Scraper +   │
-│  Core        │     │  Analyzer    │
-│  (Facts,     │     │  (Editorial  │
-│   Logic,     │     │   DNA)       │
-│   Claims)    │     │              │
-└──────┬───────┘     └──────┬───────┘
-       │                    │
-       ▼                    ▼
-┌──────────────────────────────────┐
-│  Move-by-Move Solver (Best-of-4)│
-│  M1→M2→M3→M3b→M4→M5→M6        │
-│  Each: 4 candidates → verify →  │
-│        rank → select → chain    │
-└──────────────┬───────────────────┘
-               │
-               ▼
-┌──────────────────────────────────┐
-│  Global Verifier                 │
-│  5-dim scoring + Source Lock     │
-│  + Theme-Rheme chain check      │
-└──────────────┬───────────────────┘
-               │
-               ▼
-┌──────────────────────────────────┐
-│  Adversarial Red Team            │
-│  "As a Nature reviewer, attack   │
-│   the weakest sentence"          │
-└──────────────┬───────────────────┘
-               │
-               ▼
-         Nature-tier Abstract
+  语义核心提取 ──────── 期刊编辑 DNA 分析
+  (事实 + 逻辑图)        (动词/模式/密度)
+      │                      │
+      └──────────┬───────────┘
+                 ▼
+        逐句生成器 (Best-of-4)
+        M1 上下文 → M2 差距 → M3 方法
+        → M4 结果 → M5 应用 → M6 影响
+                 │
+                 ▼
+        全局验证 + 审稿人攻击
+                 │
+                 ▼
+          Nature 级别摘要
 ```
 
-## Project Structure
+## 可用指令
 
-```
-.agent/
-├── skills/
-│   ├── extract_semantic_core/    # Manuscript → Fact Base + Logic Graph
-│   ├── imo_abstract_polish/      # Move-by-Move abstract generator (v4.0)
-│   ├── cover_letter_generator/   # 5-Move cover letter generator
-│   ├── academic-reviewer/        # PhD advisor-style manuscript review
-│   ├── academic-writer/          # IMRaD + scientific prose standards
-│   ├── academic-editor/          # Physics-aware editing layers
-│   ├── academic-analyst/         # Experimental physics analysis
-│   ├── academic-interviewer/     # Socratic defense preparation
-│   └── manuscript-preprocessor/  # Chunk manuscripts for review
-├── workflows/
-│   ├── polish_abstract.md        # Main abstract polishing pipeline
-│   ├── research.md               # Full manuscript review pipeline
-│   ├── story.md                  # Narrative reframing with journal trends
-│   ├── switch_journal.md         # Multi-journal adaptation guide
-│   └── imo.md                    # IMO math solving pipeline
-scripts/
-├── scrape_nphoton.py             # Journal TOC scraper (10 Nature journals)
-├── fetch_learning_abstracts.py   # Full abstract fetcher
-└── analyze_abstracts.py          # NLP editorial DNA analyzer
-```
-
-## Key Features
-
-| Feature | What it does |
+| 指令 | 用途 |
 |:--|:--|
-| **Semantic Core** | Compresses manuscript into facts + logic graph — prevents AI hallucination |
-| **Move-by-Move** | Generates each sentence independently with micro-verification |
-| **Best-of-4** | 4 candidates per sentence, ranked by checks passed + conciseness |
-| **Theme-Rheme** | Enforces information flow between sentences (100% chain score) |
-| **Source Lock** | Ensures output is original — no 5-gram overlap with input abstract |
-| **Red Team** | AI attacks its own output as a hostile reviewer, fixes weaknesses |
-| **Loop Closure** | Final sentence echoes opening keywords for narrative satisfaction |
-| **Multi-journal** | Switch target journal by re-running scraper + analyzer |
+| `/polish_abstract` | 生成摘要 |
+| `/research` | 完整论文审稿（分块迭代） |
+| `/story` | 用期刊趋势重塑叙事 |
+| `/switch_journal` | 切换目标期刊 |
 
-## Workflows
+## 项目结构
 
-| Command | Purpose |
-|:--|:--|
-| `/polish_abstract` | Full abstract generation pipeline |
-| `/research` | Complete manuscript review (chunked, iterative) |
-| `/story` | Reframe narrative using journal trend data |
-| `/switch_journal` | Adapt pipeline for a different journal |
+```
+.agent/skills/           # AI 技能（9 个）
+  ├── extract_semantic_core/   # 论文 → 事实库
+  ├── imo_abstract_polish/     # 摘要生成器 v4.0
+  ├── cover_letter_generator/  # Cover Letter 生成器
+  └── ...                      # 审稿、编辑、分析等
+.agent/workflows/        # 工作流（5 个）
+scripts/                 # Python 脚本（3 个）
+  ├── scrape_nphoton.py        # 期刊爬虫
+  ├── fetch_learning_abstracts.py
+  └── analyze_abstracts.py     # NLP 编辑风格分析
+```
 
-## License
+## 许可
 
 MIT
