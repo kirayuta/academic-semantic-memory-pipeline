@@ -1,0 +1,62 @@
+# Jupyter Notebooks
+.ipynb_checkpoints
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+.env
+
+# Antigravity/Agentic temporary files
+.gemini/
+.system_generated/
+*.log
+
+# Personal/IDE settings
+.vscode/
+.idea/
+.obsidian/
+
+# === PRIVATE DATA — User manuscripts & generated outputs ===
+
+# Manuscript files
+test*.md
+Paper/
+chunk_*.md
+final_manuscript.md
+
+# Pipeline outputs (regenerated per run)
+draft_abstract.md
+abstract_candidates.md
+abstract_scoring_matrix.md
+cover_letter.md
+manuscript_semantic_core.md
+writing_brief.md
+final_abstract_*.md
+refined_abstract_options.md
+
+# Scraped / fetched data (regenerated per journal)
+knowledge_base/
+trend_data/
+
+# Review artifacts
+adversarial_review.md
+author_queries.md
+claim_evidence_matrix.md
+consistency_checklist.md
+cover_letter_draft.md
+frozen/
+landscape_analysis.md
+novelty_statement.md
+preflight_results.md
+reference_audit.md
+reviewer_conflict_matrix.md
+revision_history.md
+skill_test_results.md
+System_Validation_Log.md
+AI_Engineering_Report.md
+walkthrough.md
+
+# Archive
+skills_archive/
